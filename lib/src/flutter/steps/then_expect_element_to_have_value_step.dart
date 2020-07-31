@@ -13,22 +13,62 @@ import 'package:gherkin/gherkin.dart';
 ///
 ///   `Then I expect the "controlKey" to be "Hello World"`
 ///   `And I expect the "controlKey" to be "Hello World"`
-class ThenExpectElementToHaveValue
-    extends Then2WithWorld<String, String, FlutterWorld> {
-  @override
-  RegExp get pattern => RegExp(r'I expect the {string} to be {string}$');
+StepDefinitionGeneric ThenExpectElementToHaveValue() {
+  return given2<String, String, FlutterWorld>(
+    RegExp(r'I expect the {string} to be {string}$'),
+    (key, value, context) async {
+      try {
+        final text = await FlutterDriverUtils.getText(
+          context.world.driver,
+          find.byValueKey(key),
+        );
+        context.expect(text, value);
+      } catch (e) {
+        await context.reporter.message('Step error: $e', MessageLevel.error);
+        rethrow;
+      }
+    },
+  );
+}
 
-  @override
-  Future<void> executeStep(String key, String value) async {
-    try {
-      final text = await FlutterDriverUtils.getText(
-          world.driver, find.byValueKey(key),
-          timeout: timeout * .9);
-      expect(text, value);
-    } catch (e) {
-      await reporter.message(
-          "Step error '${pattern.pattern}': $e", MessageLevel.error);
-      rethrow;
-    }
-  }
+class AuthenticationSteps {
+  static Iterable<StepDefinitionGeneric> steps = [
+    StepOne(),
+    StepFive(),
+  ];
+
+  static StepDefinitionGeneric StepOne() => given(
+        'some step',
+        (context) async {
+          // do something
+        },
+      );
+
+  static StepDefinitionGeneric StepFive() => given2<String, int, FlutterWorld>(
+        'step five with {string} and {int}',
+        (str, value, context) async {
+          // do something
+        },
+      );
+}
+
+class AccountSteps {
+  static Iterable<StepDefinitionGeneric> steps = [
+    StepOne(),
+    StepFive(),
+  ];
+
+  static StepDefinitionGeneric StepOne() => given(
+        'some step account step',
+        (context) async {
+          // do something
+        },
+      );
+
+  static StepDefinitionGeneric StepFive() => given2<String, int, FlutterWorld>(
+        'step five with {string} and {int}',
+        (str, value, context) async {
+          // do something
+        },
+      );
 }
